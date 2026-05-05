@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiz Game</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 50px;
+}
+
+#answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    max-width: 700px;
+    margin: auto;
+}
+
+button {
+    padding: 20px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #333;
+    color: white;
+    cursor: pointer;
+}
+
+.correct { background: green !important; }
+.wrong { background: red !important; }
+</style>
+</head>
+
+<body>
+
+<h1>🎮 Quiz Game</h1>
+<h2 id="score">Score: 0</h2>
+
+<div id="question">Loading...</div>
+<div id="answers"></div>
+
+<button onclick="finishGame()">Finish Game</button>
+
+<script>
+let correctAnswer = null;
+let score = 0;
+let canClick = true;
+
+async function loadQuestion() {
+    canClick = true;
+
+    const res = await fetch("/question");
+    const data = await res.json();
+
+    document.getElementById("question").innerText = data.question;
+
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+
+    correctAnswer = Number(data.correct_answer);
+
+    data.answers.forEach((ans, index) => {
+        const btn = document.createElement("button");
+        btn.innerText = ans;
+        btn.onclick = () => checkAnswer(btn, index);
+        answersDiv.appendChild(btn);
+    });
+}
+
+function checkAnswer(button, index) {
+    if (!canClick) return;
+    canClick = false;
+
+    const buttons = document.querySelectorAll("#answers button");
+
+    if (index === correctAnswer) {
+        button.classList.add("correct");
+        score += 50;
+    } else {
+        button.classList.add("wrong");
+        buttons[correctAnswer].classList.add("correct");
+        score -= 50;
+    }
+
+    document.getElementById("score").innerText = "Score: " + score;
+
+    setTimeout(loadQuestion, 1500);
+}
+
+async function finishGame() {
+    await fetch("/save_score", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ score: score })
+    });
+
+    alert("Score saved!");
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>

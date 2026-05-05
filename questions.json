@@ -1,0 +1,60 @@
+[
+{"question":"What is the basic unit of life?","answers":["Atom","Cell","Tissue","Organ"],"correct":1},
+{"question":"What do plants produce during photosynthesis?","answers":["Oxygen","Carbon dioxide","Nitrogen","Helium"],"correct":0},
+{"question":"Which organ pumps blood?","answers":["Liver","Brain","Heart","Lung"],"correct":2},
+{"question":"DNA stands for?","answers":["Deoxyribonucleic acid","Dynamic acid","Double acid","None"],"correct":0},
+{"question":"What vitamin is produced in sunlight?","answers":["A","B","C","D"],"correct":3},
+{"question":"Which blood cells fight infection?","answers":["Red","White","Platelets","None"],"correct":1},
+{"question":"What system controls the body?","answers":["Digestive","Nervous","Respiratory","Skeletal"],"correct":1},
+{"question":"What gas do humans breathe in?","answers":["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],"correct":0},
+{"question":"Which organ filters blood?","answers":["Heart","Kidney","Brain","Liver"],"correct":1},
+{"question":"What carries genetic info?","answers":["Protein","DNA","Water","Cells"],"correct":1}
+]
+[
+{"question":"Largest ocean?","answers":["Atlantic","Indian","Pacific","Arctic"],"correct":2},
+{"question":"Capital of Japan?","answers":["Beijing","Tokyo","Seoul","Bangkok"],"correct":1},
+{"question":"Which continent is Egypt in?","answers":["Asia","Europe","Africa","America"],"correct":2},
+{"question":"Longest river?","answers":["Amazon","Nile","Yangtze","Danube"],"correct":1},
+{"question":"Largest country?","answers":["USA","China","Russia","Canada"],"correct":2},
+{"question":"Capital of Ukraine?","answers":["Kyiv","Lviv","Odessa","Kharkiv"],"correct":0},
+{"question":"Mount Everest is in?","answers":["India","China","Nepal","Pakistan"],"correct":2},
+{"question":"Smallest continent?","answers":["Europe","Australia","Antarctica","Africa"],"correct":1},
+{"question":"Desert in Africa?","answers":["Gobi","Sahara","Kalahari","Both B and C"],"correct":3},
+{"question":"Which ocean is coldest?","answers":["Arctic","Pacific","Indian","Atlantic"],"correct":0}
+]
+[
+{"question":"Who discovered America?","answers":["Columbus","Newton","Einstein","Magellan"],"correct":0},
+{"question":"World War II ended in?","answers":["1942","1945","1950","1939"],"correct":1},
+{"question":"First president of USA?","answers":["Lincoln","Washington","Jefferson","Adams"],"correct":1},
+{"question":"Roman Empire capital?","answers":["Paris","Rome","Athens","Berlin"],"correct":1},
+{"question":"Who was Napoleon?","answers":["Scientist","General","Artist","King"],"correct":1},
+{"question":"Cold War was between?","answers":["USA & USSR","France & Germany","China & Japan","UK & USA"],"correct":0},
+{"question":"Great Wall is in?","answers":["India","China","Japan","Korea"],"correct":1},
+{"question":"Who invented printing press?","answers":["Gutenberg","Newton","Tesla","Ford"],"correct":0},
+{"question":"Ancient pyramids are in?","answers":["Mexico","Egypt","Peru","India"],"correct":1},
+{"question":"Who was Hitler?","answers":["Artist","Leader of Germany","Scientist","Writer"],"correct":1}
+]
+[
+{"question":"2 + 2 = ?","answers":["3","4","5","6"],"correct":1},
+{"question":"5 * 6 = ?","answers":["30","25","20","35"],"correct":0},
+{"question":"Square root of 9?","answers":["2","3","4","5"],"correct":1},
+{"question":"10 / 2 = ?","answers":["2","4","5","6"],"correct":2},
+{"question":"7 + 8 = ?","answers":["14","15","16","17"],"correct":1},
+{"question":"3^2 = ?","answers":["6","9","12","3"],"correct":1},
+{"question":"100 - 45 = ?","answers":["55","50","60","65"],"correct":0},
+{"question":"12 * 12 = ?","answers":["124","144","132","154"],"correct":1},
+{"question":"1/2 = ?","answers":["0.2","0.5","1.5","2"],"correct":1},
+{"question":"9 + 10 = ?","answers":["19","20","21","18"],"correct":0}
+]
+[
+{"question":"Hello in Spanish?","answers":["Hola","Bonjour","Ciao","Hallo"],"correct":0},
+{"question":"Hello in French?","answers":["Hola","Bonjour","Ciao","Hallo"],"correct":1},
+{"question":"Hello in German?","answers":["Hola","Bonjour","Hallo","Ciao"],"correct":2},
+{"question":"Apple in English?","answers":["Manzana","Apple","Pomme","Apfel"],"correct":1},
+{"question":"Dog in Spanish?","answers":["Gato","Perro","Chien","Hund"],"correct":1},
+{"question":"Cat in French?","answers":["Chat","Katze","Gato","Dog"],"correct":0},
+{"question":"Water in German?","answers":["Wasser","Agua","Eau","Water"],"correct":0},
+{"question":"Book in English?","answers":["Libro","Book","Livre","Buch"],"correct":1},
+{"question":"Sun in Spanish?","answers":["Sol","Sun","Soleil","Sonne"],"correct":0},
+{"question":"Moon in English?","answers":["Luna","Moon","Mond","Lune"],"correct":1}
+]
