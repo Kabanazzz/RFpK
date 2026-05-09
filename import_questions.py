@@ -1,15 +1,17 @@
 import json
 import sqlite3
 
-# подключаемся к базе
-conn = sqlite3.connect("quiz.db")
+DB_PATH = "quiz.db"
+
+conn = sqlite3.connect(DB_PATH)
 c = conn.cursor()
 
-# открываем JSON файл с вопросами
+# Clear existing questions to avoid duplicates on re-import
+c.execute("DELETE FROM questions")
+
 with open("questions.json", "r", encoding="utf-8") as f:
     questions = json.load(f)
 
-# добавляем вопросы в базу
 for q in questions:
     c.execute("""
     INSERT INTO questions (category, question, answer1, answer2, answer3, answer4, correct)
@@ -24,8 +26,7 @@ for q in questions:
         q["correct"]
     ))
 
-# сохраняем изменения
 conn.commit()
 conn.close()
 
-print(" All questions imported successfully!")
+print(f"✅ Imported {len(questions)} questions successfully!")

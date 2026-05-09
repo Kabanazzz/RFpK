@@ -1,192 +1,159 @@
 from flask import Flask, jsonify, request, render_template
 import sqlite3
-import random
+
+from repository import UserRepository, QuestionRepository, ScoreRepository
 
 app = Flask(__name__)
 
-# --- INIT DATABASE ---
+
+# ─── DATABASE INIT ────────────────────────────────────────────────────────────
+
 def init_db():
     conn = sqlite3.connect("quiz.db")
     c = conn.cursor()
 
-    # USERS
     c.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT
+        id   INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
     )
     """)
 
-    # SCORES
     c.execute("""
     CREATE TABLE IF NOT EXISTS scores (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        score INTEGER
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id        INTEGER NOT NULL,
+        score          INTEGER NOT NULL DEFAULT 0,
+        question_count INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY (user_id) REFERENCES users(id)
     )
     """)
 
-    # QUESTIONS (with category)
     c.execute("""
     CREATE TABLE IF NOT EXISTS questions (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT,
-        question TEXT,
-        answer1 TEXT,
-        answer2 TEXT,
-        answer3 TEXT,
-        answer4 TEXT,
-        correct INTEGER
+        id       INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT    NOT NULL,
+        question TEXT    NOT NULL,
+        answer1  TEXT    NOT NULL,
+        answer2  TEXT    NOT NULL,
+        answer3  TEXT    NOT NULL,
+        answer4  TEXT    NOT NULL,
+        correct  INTEGER NOT NULL
     )
     """)
 
     conn.commit()
     conn.close()
 
+
 init_db()
 
-# --- HOME ---
+
+# ─── HELPERS ──────────────────────────────────────────────────────────────────
+
+def _row_to_question(row) -> dict:
+    """Convert a DB question row to a JSON-serialisable dict."""
+    return {
+        "id":             row["id"],
+        "category":       row["category"],
+        "question":       row["question"],
+        "answers":        [row["answer1"], row["answer2"], row["answer3"], row["answer4"]],
+        "correct_answer": row["correct"],
+    }
+
+
+# ─── PAGES ────────────────────────────────────────────────────────────────────
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# --- CREATE USER ---
+
+# ─── USER CONTROLLER ──────────────────────────────────────────────────────────
+
 @app.route("/create_user", methods=["POST"])
 def create_user():
-    name = request.json.get("name")
+    name = (request.json or {}).get("name", "").strip()
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
 
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
-
-    c.execute("INSERT INTO users (name) VALUES (?)", (name,))
-    user_id = c.lastrowid
-
-    conn.commit()
-    conn.close()
-
+    user_id = UserRepository.create(name)
     return jsonify({"user_id": user_id})
 
-# --- GET RANDOM QUESTION (ALL) ---
+
+# ─── QUESTION CONTROLLER ──────────────────────────────────────────────────────
+
 @app.route("/question")
 def get_question():
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
-
-    c.execute("SELECT * FROM questions ORDER BY RANDOM() LIMIT 1")
-    row = c.fetchone()
-
-    conn.close()
-
+    row = QuestionRepository.get_random()
     if not row:
-        return jsonify({"error": "No questions in database"})
+        return jsonify({"error": "No questions in database"}), 404
+    return jsonify(_row_to_question(row))
 
-    return jsonify({
-        "question": row[2],
-        "answers": [row[3], row[4], row[5], row[6]],
-        "correct_answer": row[7]
-    })
 
-# --- GET QUESTION BY CATEGORY ---
 @app.route("/question/<category>")
-def get_question_by_category(category):
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
-
-    c.execute("""
-    SELECT * FROM questions 
-    WHERE category=? 
-    ORDER BY RANDOM() 
-    LIMIT 1
-    """, (category,))
-
-    row = c.fetchone()
-    conn.close()
-
+def get_question_by_category(category: str):
+    row = QuestionRepository.get_random_by_category(category)
     if not row:
-        return jsonify({"error": "No questions in this category"})
+        return jsonify({"error": f"No questions in category '{category}'"}), 404
+    return jsonify(_row_to_question(row))
 
-    return jsonify({
-        "question": row[2],
-        "answers": [row[3], row[4], row[5], row[6]],
-        "correct_answer": row[7]
-    })
 
-# --- ADD QUESTION ---
+@app.route("/categories")
+def get_categories():
+    categories = QuestionRepository.get_all_categories()
+    return jsonify(categories)
+
+
 @app.route("/add_question", methods=["POST"])
 def add_question():
-    data = request.json
+    data = request.json or {}
+    required = {"category", "question", "answers", "correct"}
+    missing = required - data.keys()
+    if missing:
+        return jsonify({"error": f"Missing fields: {missing}"}), 400
 
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
+    if len(data["answers"]) != 4:
+        return jsonify({"error": "Exactly 4 answers required"}), 400
 
-    c.execute("""
-    INSERT INTO questions (category, question, answer1, answer2, answer3, answer4, correct)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
+    question_id = QuestionRepository.add(
         data["category"],
         data["question"],
-        data["answers"][0],
-        data["answers"][1],
-        data["answers"][2],
-        data["answers"][3],
-        data["correct"]
-    ))
+        data["answers"],
+        data["correct"],
+    )
+    return jsonify({"status": "added", "id": question_id}), 201
 
-    conn.commit()
-    conn.close()
 
-    return jsonify({"status": "added"})
+# ─── SCORE CONTROLLER ─────────────────────────────────────────────────────────
 
-# --- SAVE SCORE ---
 @app.route("/save_score", methods=["POST"])
 def save_score():
-    user_id = request.json.get("user_id")
-    score = request.json.get("score")
+    data = request.json or {}
+    user_id        = data.get("user_id")
+    score          = data.get("score")
+    question_count = data.get("question_count", 0)   # <-- new required field
 
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
+    if user_id is None or score is None:
+        return jsonify({"error": "user_id and score are required"}), 400
 
-    c.execute("INSERT INTO scores (user_id, score) VALUES (?, ?)", (user_id, score))
-
-    conn.commit()
-    conn.close()
-
+    ScoreRepository.save(user_id, score, question_count)
     return jsonify({"status": "ok"})
 
-# --- TOTAL SCORE ---
+
 @app.route("/total_score/<int:user_id>")
-def total_score(user_id):
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
-
-    c.execute("SELECT SUM(score) FROM scores WHERE user_id=?", (user_id,))
-    total = c.fetchone()[0] or 0
-
-    conn.close()
-
+def total_score(user_id: int):
+    total = ScoreRepository.get_total_by_user(user_id)
     return jsonify({"total_score": total})
 
-# --- LEADERBOARD ---
+
 @app.route("/leaderboard")
 def leaderboard():
-    conn = sqlite3.connect("quiz.db")
-    c = conn.cursor()
-
-    c.execute("""
-    SELECT users.name, SUM(scores.score) as total
-    FROM scores
-    JOIN users ON users.id = scores.user_id
-    GROUP BY users.id
-    ORDER BY total DESC
-    LIMIT 10
-    """)
-
-    data = [{"name": row[0], "score": row[1]} for row in c.fetchall()]
-
-    conn.close()
-
+    data = ScoreRepository.get_leaderboard(limit=10)
     return jsonify(data)
 
-# --- RUN ---
+
+# ─── RUN ──────────────────────────────────────────────────────────────────────
+
 if __name__ == "__main__":
     app.run(debug=True)
