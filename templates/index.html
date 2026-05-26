@@ -1,892 +1,1069 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BrainBlast — Quiz</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
-
+<title>RRpK 💥</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
-/* ─── RESET & VARIABLES ─────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg:        #0e0e1a;
-  --surface:   #181828;
-  --card:      #1f1f35;
-  --border:    #2e2e50;
-  --accent:    #7c5cfc;
-  --accent2:   #fc5c7d;
-  --text:      #f0f0ff;
-  --muted:     #7878a0;
-  --green:     #22d67a;
-  --red:       #fc3e5f;
-  --yellow:    #ffd84d;
-  --blue:      #4d9fff;
-
-  --a0: #7c5cfc;
-  --a1: #fc5c7d;
-  --a2: #22d67a;
-  --a3: #ffd84d;
-
+  --bg: #0f0e1a;
+  --surface: #1a1830;
+  --surface2: #242240;
+  --accent: #ff4d8b;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #f1f0ff;
+  --muted: #8b87b8;
+  --ans-a: #e84393;
+  --ans-b: #3b82f6;
+  --ans-c: #f59e0b;
+  --ans-d: #10b981;
   --radius: 16px;
-  --shadow: 0 8px 32px rgba(0,0,0,.45);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
-
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family: 'Nunito', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-}
-
-/* animated background blobs */
-body::before, body::after {
-  content: '';
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: .18;
-  pointer-events: none;
-  z-index: 0;
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
 }
 body::before {
-  width: 600px; height: 600px;
-  background: var(--accent);
-  top: -200px; left: -200px;
-  animation: blob1 12s ease-in-out infinite alternate;
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(124,58,237,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(255,77,139,.12) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
 }
-body::after {
-  width: 500px; height: 500px;
-  background: var(--accent2);
-  bottom: -150px; right: -150px;
-  animation: blob2 10s ease-in-out infinite alternate;
-}
-@keyframes blob1 { to { transform: translate(80px, 80px); } }
-@keyframes blob2 { to { transform: translate(-80px, -60px); } }
+.app { position:relative; z-index:1; }
 
-/* ─── LAYOUT ────────────────────────────────────────────────────── */
-.wrapper {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 780px;
-  padding: 24px 16px 60px;
-}
+/* ─── SCREENS ─── */
+.screen { display:none; min-height:100vh; }
+.screen.active { display:flex; flex-direction:column; }
 
-/* ─── SCREENS ───────────────────────────────────────────────────── */
-.screen { display: none; animation: fadeUp .4s ease; }
-.screen.active { display: block; }
-@keyframes fadeUp {
-  from { opacity:0; transform: translateY(24px); }
-  to   { opacity:1; transform: translateY(0); }
+/* ─── LOGIN ─── */
+#screen-login {
+  align-items:center;
+  justify-content:center;
+  padding:2rem;
+  gap:2rem;
 }
-
-/* ─── LOGO / HEADER ─────────────────────────────────────────────── */
 .logo {
-  text-align: center;
-  margin-bottom: 40px;
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(3rem,10vw,6rem);
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:none;
+  filter:drop-shadow(0 0 40px rgba(255,77,139,.5));
+  animation:pulse 3s ease-in-out infinite;
 }
-.logo h1 {
-  font-size: clamp(2.4rem, 6vw, 3.8rem);
-  font-weight: 900;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@keyframes pulse { 0%,100%{filter:drop-shadow(0 0 30px rgba(255,77,139,.4))} 50%{filter:drop-shadow(0 0 60px rgba(255,77,139,.8))} }
+.login-card {
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:2.5rem;
+  width:100%;
+  max-width:420px;
+  box-shadow:var(--shadow);
 }
-.logo p {
-  color: var(--muted);
-  font-size: 1rem;
-  margin-top: 6px;
-  font-family: 'Space Grotesk', sans-serif;
+.login-card h2 { font-size:1.4rem; margin-bottom:1.5rem; color:var(--muted); font-weight:700; }
+.input-group { position:relative; margin-bottom:1rem; }
+.input-group input {
+  width:100%;
+  padding:1rem 1.2rem;
+  background:var(--surface2);
+  border:2px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  color:var(--text);
+  font-size:1.1rem;
+  font-family:'Nunito',sans-serif;
+  font-weight:700;
+  outline:none;
+  transition:.2s;
 }
-
-/* ─── CARD ──────────────────────────────────────────────────────── */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 32px;
-  box-shadow: var(--shadow);
-}
-
-/* ─── INPUTS ────────────────────────────────────────────────────── */
-.field {
-  margin-bottom: 18px;
-}
-.field label {
-  display: block;
-  font-size: .85rem;
-  font-weight: 700;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-}
-.field input, .field select {
-  width: 100%;
-  padding: 14px 18px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  outline: none;
-  transition: border-color .2s;
-  appearance: none;
-}
-.field input:focus, .field select:focus {
-  border-color: var(--accent);
-}
-.field select option { background: var(--surface); }
-
-/* ─── BUTTONS ───────────────────────────────────────────────────── */
+.input-group input:focus { border-color:var(--accent); }
+.input-group input::placeholder { color:var(--muted); font-weight:400; }
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 28px;
-  border-radius: 12px;
-  border: none;
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform .15s, box-shadow .15s;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  padding:.9rem 2rem;
+  border:none;
+  border-radius:var(--radius);
+  font-family:'Nunito',sans-serif;
+  font-size:1.05rem;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .15s;
+  width:100%;
 }
-.btn:active { transform: scale(.97); }
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff;
-  width: 100%;
-  font-size: 1.15rem;
-  padding: 16px;
-  box-shadow: 0 4px 20px rgba(124,92,252,.4);
-}
-.btn-primary:hover { box-shadow: 0 6px 28px rgba(124,92,252,.6); transform: translateY(-2px); }
-.btn-outline {
-  background: transparent;
-  border: 2px solid var(--border);
-  color: var(--muted);
-  font-size: .9rem;
-  padding: 10px 20px;
-}
-.btn-outline:hover { border-color: var(--accent); color: var(--text); }
+.btn:active { transform:scale(.97); }
+.btn-primary { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; box-shadow:0 4px 20px rgba(255,77,139,.4); }
+.btn-primary:hover { box-shadow:0 6px 28px rgba(255,77,139,.6); }
+.btn-ghost { background:var(--surface2); color:var(--text); border:1px solid rgba(255,255,255,.1); }
+.btn-ghost:hover { background:var(--surface); }
+.btn-danger { background:var(--red); color:#fff; }
+.btn-sm { padding:.5rem 1rem; font-size:.9rem; width:auto; }
 
-/* ─── TABS (category select) ────────────────────────────────────── */
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 24px;
+/* ─── HOME ─── */
+#screen-home { padding:1.5rem; gap:1.5rem; }
+.topbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:1rem 1.5rem;
+  border:1px solid rgba(255,255,255,.06);
 }
-.tab {
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  color: var(--muted);
-  font-family: 'Nunito', sans-serif;
-  font-size: .9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .2s;
+.topbar-logo { font-family:'Fredoka One',cursive; font-size:1.8rem; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.user-badge {
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  background:var(--surface2);
+  padding:.5rem 1rem;
+  border-radius:100px;
+  font-weight:800;
+  font-size:.95rem;
 }
-.tab:hover, .tab.selected {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+.avatar {
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.8rem;
+  font-weight:900;
 }
-
-/* ─── QUIZ HEADER ───────────────────────────────────────────────── */
-.quiz-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 12px;
+.section-title { font-family:'Fredoka One',cursive; font-size:1.5rem; color:var(--muted); margin-bottom:.8rem; }
+.modes-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+.mode-card {
+  background:var(--surface);
+  border:2px solid rgba(255,255,255,.06);
+  border-radius:20px;
+  padding:1.5rem;
+  cursor:pointer;
+  transition:all .2s;
+  text-align:center;
 }
-.score-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 18px;
-  font-weight: 800;
-  font-size: 1.1rem;
-}
-.score-pill .icon { font-size: 1.2rem; }
-.score-val { color: var(--yellow); }
-
-.progress-wrap {
-  width: 100%;
-  height: 6px;
-  background: var(--surface);
-  border-radius: 999px;
-  margin-bottom: 20px;
-  overflow: hidden;
-}
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius: 999px;
-  transition: width .5s ease;
-}
-
-/* ─── TIMER ─────────────────────────────────────────────────────── */
-.timer-ring {
-  position: relative;
-  width: 64px; height: 64px;
-  flex-shrink: 0;
-}
-.timer-ring svg {
-  transform: rotate(-90deg);
-  width: 64px; height: 64px;
-}
-.timer-ring circle {
-  fill: none;
-  stroke-width: 5;
-  stroke-linecap: round;
-}
-.timer-bg  { stroke: var(--surface); }
-.timer-arc {
-  stroke: var(--accent);
-  stroke-dasharray: 163;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset .9s linear, stroke .5s;
-}
-.timer-num {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 1.2rem;
-}
-
-/* ─── QUESTION CARD ─────────────────────────────────────────────── */
-.question-badge {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  border-radius: 999px;
-  padding: 4px 14px;
-  font-size: .8rem;
-  font-weight: 800;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.question-text {
-  font-size: clamp(1.15rem, 3vw, 1.5rem);
-  font-weight: 800;
-  line-height: 1.4;
-  margin-bottom: 28px;
-  text-align: center;
-  padding: 0 8px;
-}
-
-/* ─── ANSWER GRID ───────────────────────────────────────────────── */
-.answers-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-@media (max-width: 500px) { .answers-grid { grid-template-columns: 1fr; } }
-
-.answer-btn {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
-  border-radius: 14px;
-  border: 3px solid transparent;
-  font-family: 'Nunito', sans-serif;
-  font-size: .95rem;
-  font-weight: 800;
-  cursor: pointer;
-  text-align: left;
-  transition: transform .15s, box-shadow .15s, border-color .15s, background .15s;
-  color: #fff;
-}
-.answer-btn:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 24px rgba(0,0,0,.3);
-}
-.answer-btn:disabled { cursor: default; }
-.answer-btn:active:not(:disabled) { transform: scale(.98); }
-
-.answer-btn:nth-child(1) { background: var(--a0); }
-.answer-btn:nth-child(2) { background: var(--a1); }
-.answer-btn:nth-child(3) { background: var(--a2); }
-.answer-btn:nth-child(4) { background: var(--a3); color: #111; }
-
-.answer-letter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  background: rgba(255,255,255,.2);
-  font-size: .85rem;
-  font-weight: 900;
-  flex-shrink: 0;
-}
-.answer-btn:nth-child(4) .answer-letter { background: rgba(0,0,0,.15); }
-
-.answer-btn.correct {
-  background: var(--green) !important;
-  border-color: #fff !important;
-  color: #fff !important;
-  animation: pulse-correct .4s ease;
-}
-.answer-btn.wrong {
-  background: var(--red) !important;
-  border-color: rgba(255,255,255,.5) !important;
-  opacity: .85;
-}
-.answer-btn.dimmed {
-  opacity: .4;
-  transform: none !important;
-}
-@keyframes pulse-correct {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.04); }
-  100% { transform: scale(1); }
-}
-
-/* feedback flash */
-.feedback {
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: 900;
-  min-height: 40px;
-  margin-top: 20px;
-  transition: opacity .3s;
-}
-
-/* ─── LEADERBOARD ───────────────────────────────────────────────── */
-.lb-list { list-style: none; }
+.mode-card:hover { transform:translateY(-3px); border-color:var(--accent); box-shadow:0 8px 32px rgba(255,77,139,.2); }
+.mode-card.battle { border-color:rgba(255,77,139,.3); background:linear-gradient(135deg,rgba(255,77,139,.08),var(--surface)); }
+.mode-card.packs  { border-color:rgba(124,58,237,.3); background:linear-gradient(135deg,rgba(124,58,237,.08),var(--surface)); }
+.mode-emoji { font-size:2.5rem; margin-bottom:.5rem; }
+.mode-title { font-family:'Fredoka One',cursive; font-size:1.3rem; }
+.mode-desc { color:var(--muted); font-size:.85rem; margin-top:.3rem; }
+.leaderboard-mini { background:var(--surface); border-radius:20px; padding:1.2rem; border:1px solid rgba(255,255,255,.06); }
 .lb-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 18px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  animation: fadeUp .3s ease both;
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  padding:.6rem .5rem;
+  border-radius:10px;
+  transition:.15s;
 }
-.lb-row:nth-child(1) { border-color: var(--yellow); background: rgba(255,216,77,.07); }
-.lb-row:nth-child(2) { border-color: #c0c0c0;      background: rgba(192,192,192,.05); }
-.lb-row:nth-child(3) { border-color: #cd7f32;      background: rgba(205,127,50,.05); }
-.lb-rank {
-  font-size: 1.4rem;
-  width: 36px;
-  text-align: center;
-  flex-shrink: 0;
+.lb-row:hover { background:var(--surface2); }
+.lb-rank { font-family:'Fredoka One',cursive; font-size:1.1rem; width:28px; text-align:center; color:var(--muted); }
+.lb-rank.gold { color:#f59e0b; }
+.lb-rank.silver { color:#94a3b8; }
+.lb-rank.bronze { color:#b45309; }
+.lb-name { flex:1; font-weight:700; }
+.lb-score { font-family:'Fredoka One',cursive; font-size:1.1rem; color:var(--accent); }
+.nav-tabs {
+  display:flex;
+  gap:.5rem;
+  background:var(--surface2);
+  padding:.4rem;
+  border-radius:var(--radius);
 }
-.lb-name { font-weight: 800; flex: 1; font-size: 1rem; }
-.lb-score {
-  font-weight: 900;
-  font-size: 1.1rem;
-  color: var(--yellow);
+.nav-tab {
+  flex:1;
+  padding:.6rem;
+  text-align:center;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:800;
+  font-size:.9rem;
+  color:var(--muted);
+  transition:.15s;
 }
-.lb-q { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+.nav-tab.active { background:var(--surface); color:var(--text); }
 
-/* ─── RESULT SCREEN ─────────────────────────────────────────────── */
-.result-hero {
-  text-align: center;
-  padding: 40px 0 24px;
+/* ─── CATEGORY SELECT ─── */
+#screen-category { padding:1.5rem; gap:1rem; }
+.back-btn { display:flex; align-items:center; gap:.5rem; cursor:pointer; color:var(--muted); font-weight:700; width:fit-content; }
+.back-btn:hover { color:var(--text); }
+.category-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.8rem; }
+.cat-card {
+  background:var(--surface);
+  border:2px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  padding:1.2rem;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  font-weight:800;
 }
-.result-emoji { font-size: 5rem; display: block; margin-bottom: 16px; }
-.result-title { font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
-.result-sub   { color: var(--muted); font-size: 1rem; margin-bottom: 32px; }
+.cat-card:hover { transform:translateY(-2px); background:var(--surface2); }
+.cat-emoji { font-size:2rem; display:block; margin-bottom:.4rem; }
 
-.stats-row {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 32px;
+/* ─── PACKS SCREEN ─── */
+#screen-packs { padding:1.5rem; gap:1rem; overflow-y:auto; }
+.pack-card {
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+  padding:1.2rem 1.5rem;
+  display:flex;
+  align-items:center;
+  gap:1rem;
 }
-.stat-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 28px;
-  text-align: center;
-  min-width: 120px;
+.pack-info { flex:1; }
+.pack-name { font-family:'Fredoka One',cursive; font-size:1.2rem; }
+.pack-meta { color:var(--muted); font-size:.85rem; margin-top:.2rem; }
+.pack-actions { display:flex; gap:.5rem; }
+.btn-play { background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; padding:.6rem 1.2rem; border:none; border-radius:10px; font-weight:800; cursor:pointer; font-family:'Nunito',sans-serif; }
+.fab {
+  position:fixed;
+  bottom:2rem;
+  right:2rem;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;
+  color:#fff;
+  font-size:1.8rem;
+  cursor:pointer;
+  box-shadow:0 4px 20px rgba(255,77,139,.5);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .2s;
+  z-index:100;
 }
-.stat-box .val { font-size: 2rem; font-weight: 900; color: var(--accent); }
-.stat-box .lbl { font-size: .8rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; margin-top: 4px; }
+.fab:hover { transform:scale(1.1); }
 
-/* ─── MISC ──────────────────────────────────────────────────────── */
-.section-title {
-  font-size: 1.4rem;
-  font-weight: 900;
-  margin-bottom: 20px;
+/* ─── MODAL ─── */
+.modal-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  z-index:200;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:1rem;
+  backdrop-filter:blur(4px);
 }
-.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
-.row-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-.row-btns .btn { flex: 1; min-width: 140px; }
+.modal-overlay.hidden { display:none; }
+.modal {
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  padding:2rem;
+  width:100%;
+  max-width:480px;
+  max-height:90vh;
+  overflow-y:auto;
+  box-shadow:var(--shadow);
+}
+.modal h2 { font-family:'Fredoka One',cursive; font-size:1.6rem; margin-bottom:1.5rem; }
+.form-group { margin-bottom:1rem; }
+.form-group label { display:block; font-weight:700; margin-bottom:.4rem; color:var(--muted); font-size:.9rem; }
+.form-group input, .form-group textarea, .form-group select {
+  width:100%;
+  padding:.9rem 1rem;
+  background:var(--surface2);
+  border:2px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  color:var(--text);
+  font-family:'Nunito',sans-serif;
+  font-size:1rem;
+  outline:none;
+  transition:.2s;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--accent); }
+.form-group select option { background:var(--surface); }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+.modal-actions { display:flex; gap:.8rem; margin-top:1.5rem; }
+.modal-actions .btn { flex:1; }
 
-/* loading */
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--muted);
-  padding: 20px;
-  font-weight: 700;
+/* ─── QUIZ ─── */
+#screen-quiz { padding:1.5rem; gap:1.2rem; }
+.quiz-header { display:flex; align-items:center; justify-content:space-between; }
+.quiz-progress { flex:1; margin:0 1rem; }
+.progress-bar {
+  height:8px;
+  background:var(--surface2);
+  border-radius:100px;
+  overflow:hidden;
 }
-.spinner {
-  width: 22px; height: 22px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
+.progress-fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:100px;
+  transition:width .4s ease;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+.score-badge { font-family:'Fredoka One',cursive; font-size:1.2rem; color:var(--accent3); }
+.timer-ring {
+  width:52px;
+  height:52px;
+  position:relative;
+  flex-shrink:0;
+}
+.timer-ring svg { transform:rotate(-90deg); }
+.timer-ring circle {
+  fill:none;
+  stroke:var(--surface2);
+  stroke-width:4;
+}
+.timer-ring .progress-arc {
+  stroke:var(--accent);
+  stroke-linecap:round;
+  transition:stroke-dashoffset .9s linear, stroke .3s;
+}
+.timer-text {
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Fredoka One',cursive;
+  font-size:1rem;
+}
+.question-card {
+  background:var(--surface);
+  border-radius:20px;
+  padding:1.8rem;
+  border:1px solid rgba(255,255,255,.06);
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  gap:.8rem;
+}
+.question-category { color:var(--muted); font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.question-text { font-size:clamp(1.1rem,3vw,1.35rem); font-weight:800; line-height:1.4; }
+.question-image { width:100%; max-height:200px; object-fit:cover; border-radius:12px; margin-top:.5rem; }
+.answers-grid { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+.answer-btn {
+  padding:1rem;
+  border:3px solid transparent;
+  border-radius:16px;
+  cursor:pointer;
+  font-family:'Nunito',sans-serif;
+  font-weight:800;
+  font-size:.95rem;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  transition:all .15s;
+  position:relative;
+  overflow:hidden;
+}
+.answer-btn::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:.15;
+}
+.answer-btn:nth-child(1) { background:rgba(232,67,147,.15); border-color:rgba(232,67,147,.4); color:#fff; }
+.answer-btn:nth-child(1)::before { background:var(--ans-a); }
+.answer-btn:nth-child(1):hover { background:rgba(232,67,147,.3); border-color:var(--ans-a); transform:scale(1.02); }
+.answer-btn:nth-child(2) { background:rgba(59,130,246,.15); border-color:rgba(59,130,246,.4); color:#fff; }
+.answer-btn:nth-child(2)::before { background:var(--ans-b); }
+.answer-btn:nth-child(2):hover { background:rgba(59,130,246,.3); border-color:var(--ans-b); transform:scale(1.02); }
+.answer-btn:nth-child(3) { background:rgba(245,158,11,.15); border-color:rgba(245,158,11,.4); color:#fff; }
+.answer-btn:nth-child(3)::before { background:var(--ans-c); }
+.answer-btn:nth-child(3):hover { background:rgba(245,158,11,.3); border-color:var(--ans-c); transform:scale(1.02); }
+.answer-btn:nth-child(4) { background:rgba(16,185,129,.15); border-color:rgba(16,185,129,.4); color:#fff; }
+.answer-btn:nth-child(4)::before { background:var(--ans-d); }
+.answer-btn:nth-child(4):hover { background:rgba(16,185,129,.3); border-color:var(--ans-d); transform:scale(1.02); }
+.answer-btn.correct { background:rgba(16,185,129,.3) !important; border-color:var(--green) !important; transform:scale(1.03) !important; }
+.answer-btn.wrong   { background:rgba(239,68,68,.3) !important;  border-color:var(--red) !important; opacity:.8; }
+.answer-btn:disabled { cursor:default; }
+.answer-letter {
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  background:rgba(255,255,255,.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:.85rem;
+  flex-shrink:0;
+}
+.feedback-overlay {
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:8rem;
+  z-index:50;
+  pointer-events:none;
+  animation:feedbackPop .6s ease forwards;
+}
+@keyframes feedbackPop { 0%{transform:scale(.5);opacity:1} 70%{transform:scale(1.2)} 100%{transform:scale(1.5);opacity:0} }
 
+/* ─── RESULT ─── */
+#screen-result {
+  align-items:center;
+  justify-content:center;
+  padding:2rem;
+  gap:1.5rem;
+  text-align:center;
+}
+.result-emoji { font-size:5rem; animation:bounce 1s ease infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+.result-title { font-family:'Fredoka One',cursive; font-size:2.5rem; }
+.result-score { font-family:'Fredoka One',cursive; font-size:4rem; background:linear-gradient(135deg,var(--accent3),var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.result-sub { color:var(--muted); font-size:1.1rem; }
+.result-actions { display:flex; flex-direction:column; gap:.8rem; width:100%; max-width:300px; }
+
+/* ─── TOASTS ─── */
+.toast-container { position:fixed; top:1rem; right:1rem; z-index:999; display:flex; flex-direction:column; gap:.5rem; }
 .toast {
-  position: fixed;
-  bottom: 32px; left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-weight: 700;
-  box-shadow: var(--shadow);
-  opacity: 0;
-  transition: all .3s;
-  z-index: 100;
-  pointer-events: none;
+  background:var(--surface);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  padding:.8rem 1.2rem;
+  font-weight:700;
+  box-shadow:var(--shadow);
+  animation:slideIn .3s ease;
+  max-width:280px;
 }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast.success { border-color:var(--green); }
+.toast.error   { border-color:var(--red); }
+
+/* ─── EDIT PACK SCREEN ─── */
+#screen-edit-pack { padding:1.5rem; gap:1rem; overflow-y:auto; }
+.question-item {
+  background:var(--surface);
+  border-radius:12px;
+  padding:1rem 1.2rem;
+  display:flex;
+  align-items:flex-start;
+  gap:1rem;
+  border:1px solid rgba(255,255,255,.06);
+}
+.question-item-text { flex:1; font-weight:700; }
+.question-item-meta { color:var(--muted); font-size:.8rem; margin-top:.2rem; }
+.empty-state { text-align:center; color:var(--muted); padding:3rem; font-size:1.1rem; }
+
+@media(max-width:480px) {
+  .modes-grid { grid-template-columns:1fr; }
+  .answers-grid { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
+<div class="app">
 
-<div class="wrapper">
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
 
-  <!-- ══════════════ WELCOME SCREEN ══════════════ -->
-  <div id="screen-welcome" class="screen active">
-    <div class="logo">
-      <h1>⚡ BrainBlast</h1>
-      <p>Test your knowledge. Beat the leaderboard.</p>
+<!-- SCREEN: LOGIN -->
+<div class="screen active" id="screen-login">
+  <div class="logo">QuizBoom 💥</div>
+  <div class="login-card">
+    <h2>Введи своє ім'я щоб почати</h2>
+    <div class="input-group">
+      <input type="text" id="loginInput" placeholder="Твій нікнейм..." maxlength="30" autofocus>
     </div>
-
-    <div class="card">
-      <div class="field">
-        <label>Your name</label>
-        <input id="inp-name" type="text" placeholder="e.g. Alex" maxlength="24">
-      </div>
-
-      <div class="field">
-        <label>Category</label>
-        <div class="tabs" id="category-tabs">
-          <button class="tab selected" data-cat="all">🎲 All</button>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" id="btn-start">
-        ⚡ Start Quiz
-      </button>
-
-      <hr class="divider">
-
-      <button class="btn btn-outline" style="width:100%" id="btn-leaderboard">
-        🏆 View Leaderboard
-      </button>
-    </div>
+    <button class="btn btn-primary" onclick="doLogin()">▶ Поїхали!</button>
   </div>
-
-
-  <!-- ══════════════ QUIZ SCREEN ══════════════ -->
-  <div id="screen-quiz" class="screen">
-
-    <div class="quiz-header">
-      <div class="score-pill">
-        <span class="icon">⚡</span>
-        <span id="score-display" class="score-val">0</span>
-        <span style="color:var(--muted);font-size:.85rem">pts</span>
-      </div>
-      <div style="color:var(--muted);font-weight:700;font-size:.9rem" id="q-counter">Q 1 / 10</div>
-      <div class="timer-ring" id="timer-ring">
-        <svg viewBox="0 0 64 64">
-          <circle class="timer-bg"  cx="32" cy="32" r="26"/>
-          <circle class="timer-arc" cx="32" cy="32" r="26" id="timer-arc"/>
-        </svg>
-        <div class="timer-num" id="timer-num">20</div>
-      </div>
-    </div>
-
-    <div class="progress-wrap">
-      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
-    </div>
-
-    <div class="card">
-      <div style="text-align:center;margin-bottom:10px">
-        <span class="question-badge" id="cat-badge">Category</span>
-      </div>
-      <div class="question-text" id="question-text">Loading…</div>
-      <div class="answers-grid" id="answers-grid"></div>
-      <div class="feedback" id="feedback"></div>
-    </div>
-  </div>
-
-
-  <!-- ══════════════ RESULT SCREEN ══════════════ -->
-  <div id="screen-result" class="screen">
-    <div class="result-hero">
-      <span class="result-emoji" id="result-emoji">🎉</span>
-      <div class="result-title" id="result-title">Well done!</div>
-      <div class="result-sub"  id="result-sub">Here's how you did</div>
-    </div>
-
-    <div class="stats-row">
-      <div class="stat-box">
-        <div class="val" id="res-score">0</div>
-        <div class="lbl">Score</div>
-      </div>
-      <div class="stat-box">
-        <div class="val" id="res-correct">0</div>
-        <div class="lbl">Correct</div>
-      </div>
-      <div class="stat-box">
-        <div class="val" id="res-accuracy">0%</div>
-        <div class="lbl">Accuracy</div>
-      </div>
-    </div>
-
-    <div class="row-btns">
-      <button class="btn btn-primary" id="btn-play-again">🔄 Play Again</button>
-      <button class="btn btn-outline" id="btn-result-lb">🏆 Leaderboard</button>
-    </div>
-  </div>
-
-
-  <!-- ══════════════ LEADERBOARD SCREEN ══════════════ -->
-  <div id="screen-leaderboard" class="screen">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-      <button class="btn btn-outline" id="btn-lb-back">← Back</button>
-      <div class="section-title" style="margin:0">🏆 Leaderboard</div>
-    </div>
-    <div id="lb-container"><div class="loading"><div class="spinner"></div> Loading…</div></div>
-  </div>
-
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- SCREEN: HOME -->
+<div class="screen" id="screen-home">
+  <div class="topbar">
+    <span class="topbar-logo">QuizBoom 💥</span>
+    <div class="user-badge">
+      <div class="avatar" id="userAvatar">?</div>
+      <span id="userName">-</span>
+    </div>
+  </div>
 
-<!-- ══════════════ SCRIPT ══════════════ -->
+  <div>
+    <div class="section-title">🎮 Режим гри</div>
+    <div class="modes-grid">
+      <div class="mode-card battle" onclick="startBattle()">
+        <div class="mode-emoji">⚔️</div>
+        <div class="mode-title">Battle Royale</div>
+        <div class="mode-desc">Рандомні питання з усіх тем</div>
+      </div>
+      <div class="mode-card packs" onclick="showScreen('screen-category')">
+        <div class="mode-emoji">📚</div>
+        <div class="mode-title">По темах</div>
+        <div class="mode-desc">Обери категорію</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="modes-grid" style="grid-template-columns:1fr">
+      <div class="mode-card packs" onclick="showScreen('screen-packs')" style="text-align:center">
+        <div class="mode-emoji">🗂️</div>
+        <div class="mode-title">Свої Вікторини</div>
+        <div class="mode-desc">Створи власний набір питань</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">🏆 Лідерборд</div>
+    <div class="nav-tabs">
+      <div class="nav-tab active" onclick="loadLeaderboard('battle', this)">⚔️ Battle</div>
+      <div class="nav-tab" onclick="loadLeaderboard('pack', this)">🗂️ Вікторини</div>
+      <div class="nav-tab" onclick="loadLeaderboard(null, this)">🌍 Усі</div>
+    </div>
+    <div class="leaderboard-mini" id="leaderboardList" style="margin-top:.8rem"></div>
+  </div>
+</div>
+
+<!-- SCREEN: CATEGORY -->
+<div class="screen" id="screen-category">
+  <div class="back-btn" onclick="showScreen('screen-home')">← Назад</div>
+  <div class="section-title">📚 Обери тему</div>
+  <div class="category-grid" id="categoryGrid"></div>
+</div>
+
+<!-- SCREEN: PACKS -->
+<div class="screen" id="screen-packs">
+  <div class="back-btn" onclick="showScreen('screen-home')">← Назад</div>
+  <div class="section-title">🗂️ Вікторини</div>
+  <div id="packsList"></div>
+  <button class="fab" onclick="openCreatePackModal()" title="Нова вікторина">+</button>
+</div>
+
+<!-- SCREEN: EDIT PACK -->
+<div class="screen" id="screen-edit-pack">
+  <div class="back-btn" onclick="showScreen('screen-packs');loadPacks()">← Назад</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+    <div class="section-title" id="editPackTitle" style="margin:0">Вікторина</div>
+    <button class="btn btn-primary btn-sm" onclick="openAddQuestionModal()">+ Питання</button>
+  </div>
+  <div id="editPackQuestions"></div>
+</div>
+
+<!-- SCREEN: QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-header">
+    <div class="timer-ring" id="timerRing">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="22" stroke-width="4"/>
+        <circle class="progress-arc" id="timerArc" cx="26" cy="26" r="22" stroke-width="4"
+                stroke-dasharray="138" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text" id="timerText">20</div>
+    </div>
+    <div class="quiz-progress">
+      <div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);margin-bottom:.3rem">
+        <span id="questionNum">Питання 1</span>
+        <span id="questionCategory"></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="score-badge">⭐ <span id="currentScore">0</span></div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-category" id="qCategory"></div>
+    <div class="question-text" id="questionText">Завантаження...</div>
+    <img id="questionImage" class="question-image" style="display:none" src="" alt="">
+  </div>
+
+  <div class="answers-grid" id="answersGrid"></div>
+
+  <button class="btn btn-ghost" onclick="quitQuiz()" style="margin-top:auto">🚪 Завершити гру</button>
+</div>
+
+<!-- SCREEN: RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-emoji" id="resultEmoji">🎉</div>
+  <div class="result-title" id="resultTitle">Молодець!</div>
+  <div class="result-score" id="resultScore">0 / 0</div>
+  <div class="result-sub" id="resultSub">правильних відповідей</div>
+  <div class="result-actions">
+    <button class="btn btn-primary" onclick="playAgain()">🔄 Ще раз!</button>
+    <button class="btn btn-ghost" onclick="showScreen('screen-home');loadLeaderboard()">🏠 Головна</button>
+  </div>
+</div>
+
+<!-- MODAL: CREATE PACK -->
+<div class="modal-overlay hidden" id="modalCreatePack">
+  <div class="modal">
+    <h2>🗂️ Нова Вікторина</h2>
+    <div class="form-group">
+      <label>Назва</label>
+      <input type="text" id="newPackName" placeholder="Наприклад: Математика 101">
+    </div>
+    <div class="form-group">
+      <label>Категорія / Тема</label>
+      <input type="text" id="newPackCategory" placeholder="Math, English, History...">
+    </div>
+    <div class="form-group">
+      <label>Опис (необов'язково)</label>
+      <input type="text" id="newPackDesc" placeholder="Короткий опис...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalCreatePack')">Скасувати</button>
+      <button class="btn btn-primary" onclick="createPack()">Створити</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD QUESTION -->
+<div class="modal-overlay hidden" id="modalAddQuestion">
+  <div class="modal">
+    <h2>➕ Нове Питання</h2>
+    <div class="form-group">
+      <label>Питання</label>
+      <textarea id="newQText" rows="2" placeholder="Введи питання..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Посилання на зображення (необов'язково)</label>
+      <input type="url" id="newQImage" placeholder="https://...">
+    </div>
+    <div class="form-group">
+      <label>Відповіді (відмітити правильну)</label>
+      <div style="display:flex;flex-direction:column;gap:.5rem" id="answersInputs">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="radio" name="correctAns" value="0" checked>
+          <input type="text" id="ans0" placeholder="Відповідь A" style="flex:1;padding:.7rem;background:var(--surface2);border:2px solid rgba(255,255,255,.08);border-radius:10px;color:var(--text);font-family:Nunito,sans-serif;outline:none">
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="radio" name="correctAns" value="1">
+          <input type="text" id="ans1" placeholder="Відповідь B" style="flex:1;padding:.7rem;background:var(--surface2);border:2px solid rgba(255,255,255,.08);border-radius:10px;color:var(--text);font-family:Nunito,sans-serif;outline:none">
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="radio" name="correctAns" value="2">
+          <input type="text" id="ans2" placeholder="Відповідь C" style="flex:1;padding:.7rem;background:var(--surface2);border:2px solid rgba(255,255,255,.08);border-radius:10px;color:var(--text);font-family:Nunito,sans-serif;outline:none">
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <input type="radio" name="correctAns" value="3">
+          <input type="text" id="ans3" placeholder="Відповідь D" style="flex:1;padding:.7rem;background:var(--surface2);border:2px solid rgba(255,255,255,.08);border-radius:10px;color:var(--text);font-family:Nunito,sans-serif;outline:none">
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalAddQuestion')">Скасувати</button>
+      <button class="btn btn-primary" onclick="addQuestion()">Додати</button>
+    </div>
+  </div>
+</div>
+
+<audio id="sndCorrect"  src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
+<audio id="sndWrong"   src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
+
 <script>
-// ─── STATE ────────────────────────────────────────────────────────
-let userId       = null;
-let score        = 0;
-let questionNum  = 0;
-let totalQ       = 10;
-let correctCount = 0;
-let canClick     = false;
-let correctIdx   = null;
-let timerInterval = null;
-let timeLeft     = 20;
-let selectedCat  = 'all';
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const S = {
+  user:     null,
+  session:  null,
+  question: null,
+  mode:     null,
+  packId:   null,
+  category: null,
+  timer:    null,
+  timerVal: 0,
+  editPackId: null,
+};
 
-const ICONS = ['A','B','C','D'];
-const MEDALS = ['🥇','🥈','🥉'];
+const CAT_EMOJI = {
+  Biology:'🧬', Geography:'🌍', History:'📜',
+  Math:'🔢', Languages:'💬', Science:'🔬',
+};
 
-// ─── SCREEN NAVIGATION ───────────────────────────────────────────
+// ─── AUDIO ───────────────────────────────────────────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
+function getAudioCtx() { if(!audioCtx) audioCtx = new AudioCtx(); return audioCtx; }
+function playTone(freq, dur, type='sine', gain=.3) {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur);
+  } catch(e){}
+}
+function playCorrect() { playTone(523,.1); setTimeout(()=>playTone(659,.1),100); setTimeout(()=>playTone(784,.2),200); }
+function playWrong()   { playTone(220,.3,'sawtooth',.2); }
+function playTick()    { playTone(880,.05,'square',.1); }
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-// ─── TOAST ───────────────────────────────────────────────────────
-function toast(msg, duration = 2500) {
-  const t = document.getElementById('toast');
+function toast(msg, type='') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
   t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+async function api(url, opts={}) {
+  const r = await fetch(url, { headers:{'Content-Type':'application/json'}, ...opts });
+  return r.json();
 }
 
-// ─── LOAD CATEGORIES ─────────────────────────────────────────────
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const name = document.getElementById('loginInput').value.trim();
+  if (!name) return toast('Введи нікнейм!','error');
+  const data = await api('/login', { method:'POST', body:JSON.stringify({name}) });
+  if (data.error) return toast(data.error,'error');
+  S.user = data;
+  localStorage.setItem('quizboom_user', JSON.stringify(data));
+  document.getElementById('userName').textContent  = data.name;
+  document.getElementById('userAvatar').textContent = data.name[0].toUpperCase();
+  showScreen('screen-home');
+  loadLeaderboard();
+  checkResumeSession();
+}
+
+function checkSavedUser() {
+  const saved = localStorage.getItem('quizboom_user');
+  if (saved) {
+    try {
+      const u = JSON.parse(saved);
+      document.getElementById('loginInput').value = u.name;
+    } catch(e){}
+  }
+}
+
+async function checkResumeSession() {
+  if (!S.user) return;
+  const sess = await api('/session/active/' + S.user.id);
+  if (sess && sess.is_active) {
+    if (confirm(`Відновити незавершену гру? (${sess.score} очок, ${sess.question_count} питань)`)) {
+      S.session  = sess;
+      S.mode     = sess.mode;
+      S.packId   = sess.pack_id;
+      S.category = sess.category;
+      showScreen('screen-quiz');
+      updateQuizUI();
+      loadNextQuestion();
+    }
+  }
+}
+
+// ─── LEADERBOARD ─────────────────────────────────────────────────────────────
+async function loadLeaderboard(mode=null, tabEl=null) {
+  if (tabEl) {
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    tabEl.classList.add('active');
+  }
+  const url = mode ? `/leaderboard?mode=${mode}` : '/leaderboard';
+  const data = await api(url);
+  const ranks = ['🥇','🥈','🥉'];
+  const rankClass = ['gold','silver','bronze'];
+  const el = document.getElementById('leaderboardList');
+  if (!data.length) { el.innerHTML='<div class="empty-state">Поки що нікого немає 👀</div>'; return; }
+  el.innerHTML = data.map((r,i) => `
+    <div class="lb-row">
+      <div class="lb-rank ${rankClass[i]||''}">${ranks[i]||i+1}</div>
+      <div class="lb-name">${r.name}</div>
+      <div class="lb-score">⭐ ${r.score}</div>
+    </div>`).join('');
+}
+
+// ─── CATEGORIES ──────────────────────────────────────────────────────────────
 async function loadCategories() {
-  try {
-    const res  = await fetch('/categories');
-    const cats = await res.json();
-    const tabs = document.getElementById('category-tabs');
-    cats.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className   = 'tab';
-      btn.dataset.cat = cat;
-      btn.textContent = catEmoji(cat) + ' ' + cat;
-      btn.onclick = () => selectCat(cat, btn);
-      tabs.appendChild(btn);
-    });
-  } catch(_) {}
+  const cats = await api('/categories');
+  const grid = document.getElementById('categoryGrid');
+  grid.innerHTML = cats.map(c => `
+    <div class="cat-card" onclick="startCategory('${c}')">
+      <span class="cat-emoji">${CAT_EMOJI[c]||'❓'}</span>
+      ${c}
+    </div>`).join('');
 }
 
-function catEmoji(cat) {
-  const map = { Biology:'🧬', Geography:'🌍', History:'📜', Math:'🔢', Languages:'💬', Science:'🔬' };
-  return map[cat] || '📚';
-}
-
-function selectCat(cat, btn) {
-  selectedCat = cat;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('selected'));
-  btn.classList.add('selected');
-}
-
-// ─── GAME FLOW ────────────────────────────────────────────────────
-async function startGame() {
-  const name = document.getElementById('inp-name').value.trim();
-  if (!name) { toast('✏️ Please enter your name!'); return; }
-
-  try {
-    const res  = await fetch('/create_user', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ name })
-    });
-    const data = await res.json();
-    userId = data.user_id;
-  } catch(_) { toast('❌ Server error'); return; }
-
-  score        = 0;
-  questionNum  = 0;
-  correctCount = 0;
-  updateScoreDisplay();
+// ─── GAME START ───────────────────────────────────────────────────────────────
+async function startBattle() {
+  S.mode = 'battle'; S.packId = null; S.category = null;
+  const sess = await api('/session/start', { method:'POST',
+    body:JSON.stringify({ user_id:S.user.id, mode:'battle' }) });
+  S.session = { id:sess.session_id, score:0, question_count:0, used_ids:[] };
   showScreen('screen-quiz');
-  loadQuestion();
+  updateQuizUI();
+  loadNextQuestion();
 }
 
-async function loadQuestion() {
-  clearTimer();
-  canClick = false;
-  document.getElementById('feedback').textContent = '';
-
-  const endpoint = selectedCat === 'all'
-    ? '/question'
-    : `/question/${encodeURIComponent(selectedCat)}`;
-
-  let data;
-  try {
-    const res = await fetch(endpoint);
-    data = await res.json();
-    if (data.error) { toast('⚠️ ' + data.error); return; }
-  } catch(_) { toast('❌ Network error'); return; }
-
-  questionNum++;
-  document.getElementById('q-counter').textContent = `Q ${questionNum} / ${totalQ}`;
-  document.getElementById('progress-bar').style.width = `${((questionNum-1)/totalQ)*100}%`;
-  document.getElementById('cat-badge').textContent = catEmoji(data.category) + ' ' + data.category;
-  document.getElementById('question-text').textContent = data.question;
-
-  correctIdx = Number(data.correct_answer);
-  const grid = document.getElementById('answers-grid');
-  grid.innerHTML = '';
-
-  data.answers.forEach((ans, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'answer-btn';
-    btn.innerHTML = `<span class="answer-letter">${ICONS[i]}</span><span>${ans}</span>`;
-    btn.onclick = () => handleAnswer(btn, i);
-    grid.appendChild(btn);
-  });
-
-  canClick = true;
-  startTimer();
+async function startCategory(cat) {
+  S.mode = 'category'; S.packId = null; S.category = cat;
+  const sess = await api('/session/start', { method:'POST',
+    body:JSON.stringify({ user_id:S.user.id, mode:'category', category:cat }) });
+  S.session = { id:sess.session_id, score:0, question_count:0, used_ids:[] };
+  showScreen('screen-quiz');
+  updateQuizUI();
+  loadNextQuestion();
 }
 
-function handleAnswer(btn, index) {
-  if (!canClick) return;
-  canClick = false;
-  clearTimer();
-
-  const btns = document.querySelectorAll('.answer-btn');
-
-  if (index === correctIdx) {
-    btn.classList.add('correct');
-    const pts = Math.max(100, Math.round(100 + timeLeft * 5));
-    score += pts;
-    correctCount++;
-    document.getElementById('feedback').textContent = `✅ Correct! +${pts} pts`;
-  } else {
-    btn.classList.add('wrong');
-    btns[correctIdx].classList.add('correct');
-    score = Math.max(0, score - 50);
-    document.getElementById('feedback').textContent = '❌ Wrong!';
-  }
-
-  btns.forEach((b,i) => {
-    b.disabled = true;
-    if (i !== index && i !== correctIdx) b.classList.add('dimmed');
-  });
-
-  updateScoreDisplay();
-
-  if (questionNum >= totalQ) {
-    setTimeout(finishGame, 1400);
-  } else {
-    setTimeout(loadQuestion, 1400);
-  }
+async function startPack(packId) {
+  S.mode = 'pack'; S.packId = packId; S.category = null;
+  const sess = await api('/session/start', { method:'POST',
+    body:JSON.stringify({ user_id:S.user.id, mode:'pack', pack_id:packId }) });
+  S.session = { id:sess.session_id, score:0, question_count:0, used_ids:[] };
+  showScreen('screen-quiz');
+  updateQuizUI();
+  loadNextQuestion();
 }
 
-function timeUp() {
-  if (!canClick) return;
-  canClick = false;
-  const btns = document.querySelectorAll('.answer-btn');
-  btns.forEach(b => { b.disabled = true; b.classList.add('dimmed'); });
-  btns[correctIdx].classList.remove('dimmed');
-  btns[correctIdx].classList.add('correct');
-  document.getElementById('feedback').textContent = "⏰ Time's up!";
-  score = Math.max(0, score - 50);
-  updateScoreDisplay();
+// ─── QUIZ LOGIC ───────────────────────────────────────────────────────────────
+async function loadNextQuestion() {
+  clearInterval(S.timer);
+  let url;
+  if (S.mode === 'pack')          url = `/packs/${S.packId}/question?session_id=${S.session.id}`;
+  else if (S.mode === 'category') url = `/question/${S.category}?session_id=${S.session.id}`;
+  else                            url = `/question?session_id=${S.session.id}`;
 
-  if (questionNum >= totalQ) {
-    setTimeout(finishGame, 1400);
-  } else {
-    setTimeout(loadQuestion, 1400);
-  }
+  const q = await api(url);
+  if (q.error === 'no_more_questions') { finishGame(); return; }
+
+  S.question = q;
+  renderQuestion(q);
+  startTimer(20);
 }
 
-// ─── TIMER ────────────────────────────────────────────────────────
-function startTimer() {
-  timeLeft = 20;
-  updateTimerUI();
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimerUI();
-    if (timeLeft <= 0) { clearTimer(); timeUp(); }
+function renderQuestion(q) {
+  document.getElementById('questionText').textContent = q.question;
+  document.getElementById('qCategory').textContent    = q.category;
+  const img = document.getElementById('questionImage');
+  if (q.image_url) { img.src = q.image_url; img.style.display = ''; }
+  else             { img.style.display = 'none'; }
+
+  const letters = ['A','B','C','D'];
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = q.answers.map((a,i) => `
+    <button class="answer-btn" onclick="selectAnswer(${i})">
+      <div class="answer-letter">${letters[i]}</div>
+      <span>${a}</span>
+    </button>`).join('');
+
+  updateQuizUI();
+}
+
+function updateQuizUI() {
+  if (!S.session) return;
+  document.getElementById('currentScore').textContent = S.session.score || 0;
+  document.getElementById('questionNum').textContent = `Питання ${(S.session.question_count||0)+1}`;
+  const pct = Math.min(((S.session.question_count||0) / 20) * 100, 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+function startTimer(seconds) {
+  S.timerVal = seconds;
+  const arc  = document.getElementById('timerArc');
+  const txt  = document.getElementById('timerText');
+  const circ = 138;
+  arc.style.stroke = 'var(--accent)';
+
+  S.timer = setInterval(() => {
+    S.timerVal--;
+    txt.textContent = S.timerVal;
+    arc.style.strokeDashoffset = circ * (1 - S.timerVal / seconds);
+    if (S.timerVal <= 5) { arc.style.stroke = 'var(--red)'; playTick(); }
+    if (S.timerVal <= 0) { clearInterval(S.timer); timeUp(); }
   }, 1000);
 }
 
-function clearTimer() { clearInterval(timerInterval); timerInterval = null; }
-
-function updateTimerUI() {
-  const circ = 163;
-  const offset = circ * (1 - timeLeft / 20);
-  const arc = document.getElementById('timer-arc');
-  arc.style.strokeDashoffset = offset;
-  arc.style.stroke = timeLeft > 10 ? 'var(--accent)' : timeLeft > 5 ? 'var(--yellow)' : 'var(--red)';
-  document.getElementById('timer-num').textContent = timeLeft;
+function timeUp() {
+  disableAnswers();
+  highlightCorrect();
+  playWrong();
+  showFeedback('⏰');
+  recordAnswer(false);
+  setTimeout(loadNextQuestion, 1500);
 }
 
-// ─── SCORE ────────────────────────────────────────────────────────
-function updateScoreDisplay() {
-  document.getElementById('score-display').textContent = score;
+async function selectAnswer(idx) {
+  clearInterval(S.timer);
+  disableAnswers();
+  const correct = idx === S.question.correct_answer;
+  const btns = document.querySelectorAll('.answer-btn');
+  btns[idx].classList.add(correct ? 'correct' : 'wrong');
+  highlightCorrect();
+  if (correct) { playCorrect(); showFeedback('✅'); }
+  else         { playWrong();   showFeedback('❌'); }
+  await recordAnswer(correct);
+  setTimeout(loadNextQuestion, 1400);
 }
 
-// ─── FINISH ───────────────────────────────────────────────────────
+async function recordAnswer(correct) {
+  const res = await api(`/session/${S.session.id}/answer`, {
+    method:'POST',
+    body: JSON.stringify({ correct, question_id: S.question.id }),
+  });
+  S.session.score          = res.score;
+  S.session.question_count = res.question_count;
+  document.getElementById('currentScore').textContent = res.score;
+}
+
+function disableAnswers() {
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+}
+function highlightCorrect() {
+  const btns = document.querySelectorAll('.answer-btn');
+  if (btns[S.question.correct_answer]) btns[S.question.correct_answer].classList.add('correct');
+}
+function showFeedback(emoji) {
+  const el = document.createElement('div');
+  el.className = 'feedback-overlay';
+  el.textContent = emoji;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+
 async function finishGame() {
-  // Save score with question_count (new field as required by teacher)
-  try {
-    await fetch('/save_score', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ user_id: userId, score, question_count: totalQ })
-    });
-  } catch(_) {}
-
-  // Result screen
-  const accuracy = Math.round((correctCount / totalQ) * 100);
-  document.getElementById('res-score').textContent    = score;
-  document.getElementById('res-correct').textContent  = `${correctCount}/${totalQ}`;
-  document.getElementById('res-accuracy').textContent = accuracy + '%';
-
-  const emoji = accuracy >= 80 ? '🏆' : accuracy >= 50 ? '😊' : '😅';
-  const title = accuracy >= 80 ? 'Brilliant!' : accuracy >= 50 ? 'Good job!' : 'Keep practising!';
-  document.getElementById('result-emoji').textContent = emoji;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-sub').textContent   =
-    `You got ${correctCount} out of ${totalQ} correct`;
-
+  clearInterval(S.timer);
+  const res = await api(`/session/${S.session.id}/finish`, { method:'POST' });
+  const score = res.score;
+  const total = res.question_count;
+  const pct   = total ? Math.round(score/total*100) : 0;
+  document.getElementById('resultScore').textContent = `${score} / ${total}`;
+  document.getElementById('resultEmoji').textContent = pct>=80?'🏆':pct>=50?'🎉':'💪';
+  document.getElementById('resultTitle').textContent = pct>=80?'Відмінно!':pct>=50?'Непогано!':'Ще потренуйся!';
+  document.getElementById('resultSub').textContent   = `${pct}% правильних відповідей`;
   showScreen('screen-result');
+  loadLeaderboard();
 }
 
-function restartGame() { showScreen('screen-welcome'); }
-
-// ─── LEADERBOARD ──────────────────────────────────────────────────
-async function loadLeaderboard() {
-  const cont = document.getElementById('lb-container');
-  cont.innerHTML = '<div class="loading"><div class="spinner"></div> Loading…</div>';
-  try {
-    const res  = await fetch('/leaderboard');
-    const data = await res.json();
-    if (!data.length) { cont.innerHTML = '<p style="text-align:center;color:var(--muted);padding:24px">No scores yet — be the first! 🎮</p>'; return; }
-
-    const ul = document.createElement('ul');
-    ul.className = 'lb-list';
-    data.forEach((player, i) => {
-      const li = document.createElement('li');
-      li.className = 'lb-row';
-      li.style.animationDelay = `${i * 60}ms`;
-      li.innerHTML = `
-        <div class="lb-rank">${i < 3 ? MEDALS[i] : i+1}</div>
-        <div style="flex:1">
-          <div class="lb-name">${escHtml(player.name)}</div>
-          <div class="lb-q">${player.questions} questions played</div>
-        </div>
-        <div class="lb-score">${player.score} pts</div>
-      `;
-      ul.appendChild(li);
-    });
-    cont.innerHTML = '';
-    cont.appendChild(ul);
-  } catch(_) {
-    cont.innerHTML = '<p style="color:var(--red);text-align:center;padding:24px">Failed to load leaderboard.</p>';
-  }
+async function quitQuiz() {
+  if (!confirm('Справді завершити гру? Прогрес збережеться.')) return;
+  await finishGame();
 }
 
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function playAgain() {
+  if      (S.mode === 'pack')     startPack(S.packId);
+  else if (S.mode === 'category') startCategory(S.category);
+  else                            startBattle();
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('btn-start').addEventListener('click', startGame);
+// ─── PACKS ────────────────────────────────────────────────────────────────────
+async function loadPacks() {
+  const packs = await api('/packs');
+  const el = document.getElementById('packsList');
+  if (!packs.length) { el.innerHTML = '<div class="empty-state">Ще немає вікторин. Натисни + щоб створити!</div>'; return; }
+  el.innerHTML = packs.map(p => `
+    <div class="pack-card">
+      <div class="pack-info">
+        <div class="pack-name">${p.name}</div>
+        <div class="pack-meta">${p.category} · ${p.question_count} питань${p.author_name?' · '+p.author_name:''}</div>
+      </div>
+      <div class="pack-actions">
+        <button class="btn btn-ghost btn-sm" onclick="editPack(${p.id},'${p.name.replace(/'/g,"\\'")}')">✏️</button>
+        ${p.question_count>0?`<button class="btn-play" onclick="startPack(${p.id})">▶ Грати</button>`:''}
+      </div>
+    </div>`).join('');
+}
 
-  document.getElementById('btn-leaderboard').addEventListener('click', function () {
-    showScreen('screen-leaderboard');
-    loadLeaderboard();
-  });
+function openCreatePackModal() { openModal('modalCreatePack'); }
+async function createPack() {
+  const name     = document.getElementById('newPackName').value.trim();
+  const category = document.getElementById('newPackCategory').value.trim() || 'Custom';
+  const desc     = document.getElementById('newPackDesc').value.trim();
+  if (!name) return toast('Введи назву!','error');
+  const r = await api('/packs', { method:'POST',
+    body:JSON.stringify({ name, category, description:desc, user_id:S.user?.id }) });
+  if (r.error) return toast(r.error,'error');
+  closeModal('modalCreatePack');
+  document.getElementById('newPackName').value = '';
+  document.getElementById('newPackCategory').value = '';
+  document.getElementById('newPackDesc').value = '';
+  toast('Вікторину створено! ✅','success');
+  loadPacks();
+  editPack(r.id, name);
+}
 
-  document.getElementById('btn-play-again').addEventListener('click', restartGame);
+async function editPack(id, name) {
+  S.editPackId = id;
+  document.getElementById('editPackTitle').textContent = '✏️ ' + name;
+  showScreen('screen-edit-pack');
+  loadPackQuestions(id);
+}
 
-  document.getElementById('btn-result-lb').addEventListener('click', function () {
-    showScreen('screen-leaderboard');
-    loadLeaderboard();
-  });
+async function loadPackQuestions(packId) {
+  const qs = await api(`/packs/${packId}/questions`);
+  const el = document.getElementById('editPackQuestions');
+  if (!qs.length) { el.innerHTML = '<div class="empty-state">Питань ще немає. Додай першe! 👆</div>'; return; }
+  el.innerHTML = qs.map(q => `
+    <div class="question-item">
+      <div style="flex:1">
+        <div class="question-item-text">${q.question}</div>
+        <div class="question-item-meta">✅ ${q['answer'+(q.correct+1)]} | ${q.answer1} / ${q.answer2} / ${q.answer3} / ${q.answer4}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteQuestion(${q.id})">🗑</button>
+    </div>`).join('');
+}
 
-  document.getElementById('btn-lb-back').addEventListener('click', function () {
-    showScreen('screen-welcome');
-  });
+function openAddQuestionModal() { openModal('modalAddQuestion'); }
+async function addQuestion() {
+  const text = document.getElementById('newQText').value.trim();
+  if (!text) return toast('Введи питання!','error');
+  const answers = ['ans0','ans1','ans2','ans3'].map(id => document.getElementById(id).value.trim());
+  if (answers.some(a=>!a)) return toast('Заповни всі 4 відповіді!','error');
+  const correct = +document.querySelector('input[name=correctAns]:checked').value;
+  const image_url = document.getElementById('newQImage').value.trim() || null;
+  const r = await api('/add_question', { method:'POST',
+    body:JSON.stringify({ pack_id:S.editPackId, question:text, answers, correct, image_url }) });
+  if (r.error) return toast(r.error,'error');
+  closeModal('modalAddQuestion');
+  document.getElementById('newQText').value = '';
+  document.getElementById('newQImage').value = '';
+  ['ans0','ans1','ans2','ans3'].forEach(id => document.getElementById(id).value = '');
+  document.querySelector('input[name=correctAns][value="0"]').checked = true;
+  toast('Питання додано! ✅','success');
+  loadPackQuestions(S.editPackId);
+}
 
-  // Enter key on name input starts the game
-  document.getElementById('inp-name').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') startGame();
-  });
+async function deleteQuestion(id) {
+  if (!confirm('Видалити це питання?')) return;
+  await api('/questions/'+id, { method:'DELETE' });
+  toast('Видалено','success');
+  loadPackQuestions(S.editPackId);
+}
 
-  loadCategories();
+// ─── SCREEN ENTER HOOKS ────────────────────────────────────────────────────────
+const _origShow = showScreen;
+window.showScreen = function(id) {
+  _origShow(id);
+  if (id === 'screen-category') loadCategories();
+  if (id === 'screen-packs')    loadPacks();
+};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('screen-login').classList.contains('active')) doLogin();
 });
+checkSavedUser();
 </script>
 </body>
 </html>
